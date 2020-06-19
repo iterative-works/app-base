@@ -61,23 +61,9 @@ trait BaseJSModule extends BaseModule with ScalaJSModule {
   def moduleKind = T(scalajslib.api.ModuleKind.CommonJSModule)
   def ivyDeps = T {
     super.ivyDeps() ++ Agg(
-      ivy"io.github.cquiroz::scala-java-time::${V.scalaJavaTime}"
-    )
-  }
-}
-
-trait AppJSModule extends BaseJSModule {
-  def ivyDeps = T {
-    super.ivyDeps() ++ Agg(
-      ivy"dev.zio::zio::${V.zio}",
-      ivy"dev.zio::zio-streams::${V.zio}",
-      // TODO: use jshttp for production
-      ivy"dev.zio::zio-logging-jsconsole::0.2.9",
-      ivy"com.softwaremill.sttp.client::core::${V.sttp}",
-      ivy"com.softwaremill.sttp.client::circe::${V.sttp}"
-    ) ++ Agg(
-      Seq("circe-core", "circe-generic", "circe-parser", "circe-generic-extras")
-        .map(name => ivy"io.circe::$name::${V.circe}"): _*
+      ivy"io.github.cquiroz::scala-java-time::${V.scalaJavaTime}",
+      // FIXME: replace with selective TZDB data, this is too big!
+      ivy"io.github.cquiroz::scala-java-time-tzdb::${V.scalaJavaTime}"
     )
   }
 }
@@ -139,3 +125,24 @@ object dataJvm extends DataModule {
 }
 
 object dataJs extends DataModule with BaseJSModule
+
+object webapp extends ComponentsJSModule { 
+  def ivyDeps = T {
+    super.ivyDeps() ++ Agg(
+      ivy"dev.zio::zio::${V.zio}",
+      ivy"dev.zio::zio-streams::${V.zio}",
+      // TODO: use jshttp for production
+      ivy"dev.zio::zio-logging-jsconsole::0.2.9",
+      ivy"com.softwaremill.sttp.client::core::${V.sttp}",
+      ivy"com.softwaremill.sttp.client::circe::${V.sttp}"
+    ) ++ Agg(
+      Seq("circe-core", "circe-generic", "circe-parser", "circe-generic-extras")
+        .map(name => ivy"io.circe::$name::${V.circe}"): _*
+    )
+  }
+}
+
+trait AppJSModule extends BaseJSModule {
+  def appModuleDeps: Seq[JavaModule] = Seq.empty[JavaModule]
+  def moduleDeps: Seq[JavaModule] = Seq(webapp) ++ appModuleDeps
+}

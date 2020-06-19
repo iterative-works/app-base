@@ -8,5 +8,6 @@ object V {
   val specs = "4.9.2"
   val sttp = "2.1.5"
   val zio = "1.0.0-RC20"
+  val zioLogging = "0.2.9"
 }
 
